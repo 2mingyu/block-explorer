@@ -1,38 +1,181 @@
-.App {
-  text-align: center;
-}
+/* src/App.css */
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* 전체 레이아웃 스타일 */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: #F6F4F3;
+  margin: 0;
+  padding: 0;
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+  background-color: #276FBF;
+  color: #F6F4F3;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.App-body {
+  display: flex;
+  height: calc(100vh - 80px); /* 헤더 높이를 제외한 전체 높이 */
+}
+
+.App-sidebar {
+  width: 250px;
+  background-color: #FFFFFF;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.App-sidebar nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.App-sidebar nav ul li {
+  margin-bottom: 20px;
+}
+
+.App-sidebar nav ul li a {
+  text-decoration: none;
+  color: #276FBF;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.App-sidebar nav ul li a:hover {
+  color: #C58966;
+}
+
+.App-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+h2 {
+  color: #276FBF;
+}
+
+/* 폼 및 버튼 스타일 */
+form {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  margin-top: 50px;
 }
 
-.App-link {
-  color: #61dafb;
+form label {
+  font-size: 18px;
+  margin-bottom: 10px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+form input {
+  padding: 10px;
+  font-size: 16px;
+  margin-bottom: 20px;
+  width: 300px;
+  border: 1px solid #276FBF;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+form button {
+  background-color: #276FBF;
+  color: #F6F4F3;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+form button:hover {
+  background-color: #1F0318;
+}
+
+/* 블록 넘버 스타일 */
+.block-number {
+  background-color: #FFFFFF;
+  border-radius: 10px;
+  padding: 10px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: inline-block;
+  font-size: 18px;
+  color: #276FBF;
+  margin-top: 10px;
+}
+
+/* 트랜잭션 리스트 스타일 */
+.transaction-list {
+  background-color: #FFFFFF;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.transaction-list-header,
+.transaction-list-item {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 10px 0;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.transaction-list-header {
+  font-weight: bold;
+  background-color: #F6F4F3;
+}
+
+.transaction-list-item {
+  align-items: center;
+}
+
+.transaction-list-item:last-child {
+  border-bottom: none;
+}
+
+.transaction-list-item div {
+  padding: 5px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transaction-list-item .address {
+  color: #276FBF;
+  cursor: pointer;
+}
+
+.transaction-list-item .address:hover {
+  color: #C58966;
+}
+
+.transaction-list-item .timestamp {
+  color: #888888;
+  font-size: 14px;
+}
+
+details {
+  margin-top: 10px;
+}
+
+details summary {
+  cursor: pointer;
+  color: #276FBF;
+}
+
+details pre {
+  background-color: #F6F4F3;
+  padding: 10px;
+  border: 1px solid #276FBF;
+  border-radius: 10px;
+  overflow-x: auto;
 }
