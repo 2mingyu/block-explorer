@@ -30,6 +30,9 @@ body {
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   border-top-right-radius: 20px;
   border-bottom-right-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .App-sidebar nav ul {
@@ -178,4 +181,19 @@ details pre {
   border: 1px solid #276FBF;
   border-radius: 10px;
   overflow-x: auto;
+}
+
+/* 새로고침 버튼 스타일 */
+.refresh-button {
+  padding: 10px 20px;
+  background-color: #276FBF;
+  color: #F6F4F3;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.refresh-button:hover {
+  background-color: #1F0318;
 }

@@ -20,6 +20,7 @@ interface Transaction {
 interface TransactionListProps {
   web3: Web3;
   blockNumber: number;
+  onBlockNumberChange: (blockNumber: number) => void;
 }
 
 const CONTRACT_NAMES: { [key: string]: string } = {
@@ -28,55 +29,57 @@ const CONTRACT_NAMES: { [key: string]: string } = {
   [CONTRACT_ADDRESSES.PLZToken]: 'PLZToken',
 };
 
-const TransactionList: React.FC<TransactionListProps> = ({ web3, blockNumber }) => {
+const TransactionList: React.FC<TransactionListProps> = ({ web3, blockNumber, onBlockNumberChange }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      setLoading(true);
-      try {
-        let currentBlockNumber = blockNumber;
-        let txs: Transaction[] = [];
+  const fetchTransactions = async () => {
+    setLoading(true);
+    try {
+      const latestBlockNumber = await web3.eth.getBlockNumber();
+      onBlockNumberChange(Number(latestBlockNumber));
+      let currentBlockNumber = latestBlockNumber;
+      let txs: Transaction[] = [];
 
-        while (txs.length < 100 && currentBlockNumber >= 0) {
-          const block = await web3.eth.getBlock(currentBlockNumber, true);
-          if (block && block.transactions) {
-            const blockTxs = await Promise.all(
-              block.transactions.map(async (tx: any) => {
-                let functionName = 'N/A';
-                let params = {};
-                try {
-                  const decoded = decodeTransactionInput(web3, [OrderingABI, PLZTokenABI, PLZNFTABI], tx.input);
-                  functionName = decoded.name;
-                  params = decoded.params;
-                } catch (error) {
-                  console.error('Error decoding transaction input', error);
-                }
-                return {
-                  hash: tx.hash,
-                  from: tx.from,
-                  to: tx.to,
-                  value: web3.utils.fromWei(tx.value, 'ether'), // Convert value to ETH
-                  timestamp: new Date(Number(block.timestamp) * 1000).toLocaleString(), // Convert timestamp to readable format
-                  functionName,
-                  params,
-                };
-              })
-            );
-            txs = [...txs, ...blockTxs];
-          }
-          currentBlockNumber--;
+      while (txs.length < 100 && currentBlockNumber >= 0) {
+        const block = await web3.eth.getBlock(currentBlockNumber, true);
+        if (block && block.transactions) {
+          const blockTxs = await Promise.all(
+            block.transactions.map(async (tx: any) => {
+              let functionName = 'N/A';
+              let params = {};
+              try {
+                const decoded = decodeTransactionInput(web3, [OrderingABI, PLZTokenABI, PLZNFTABI], tx.input);
+                functionName = decoded.name;
+                params = decoded.params;
+              } catch (error) {
+                console.error('Error decoding transaction input', error);
+              }
+              return {
+                hash: tx.hash,
+                from: tx.from,
+                to: tx.to,
+                value: web3.utils.fromWei(tx.value, 'ether'), // Convert value to ETH
+                timestamp: new Date(Number(block.timestamp) * 1000).toLocaleString(), // Convert timestamp to readable format
+                functionName,
+                params,
+              };
+            })
+          );
+          txs = [...txs, ...blockTxs];
         }
-
-        setTransactions(txs.slice(0, 100)); // Ensure only 100 transactions are set
-      } catch (error) {
-        console.error('Error fetching transactions:', error);
-      } finally {
-        setLoading(false);
+        currentBlockNumber--;
       }
-    };
 
+      setTransactions(txs.slice(0, 100)); // Ensure only 100 transactions are set
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchTransactions();
   }, [web3, blockNumber]);
 
@@ -96,7 +99,9 @@ const TransactionList: React.FC<TransactionListProps> = ({ web3, blockNumber }) 
 
   return (
     <div>
-      <h2>Latest Transactions</h2>
+      <div className="header-with-button">
+        <h2>Latest Transactions</h2>
+      </div>
       {loading ? (
         <p>Loading...</p>
       ) : (

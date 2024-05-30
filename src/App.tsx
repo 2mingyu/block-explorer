@@ -1,5 +1,5 @@
 // src/App.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import BlockNumber from './components/BlockNumber';
@@ -13,17 +13,36 @@ import Web3 from 'web3';
 const App: React.FC = () => {
   const [web3, setWeb3] = useState<Web3 | null>(null);
   const [blockNumber, setBlockNumber] = useState<number | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleRpcUrlSubmit = (web3Instance: Web3) => {
     setWeb3(web3Instance);
   };
+
+  const fetchBlockNumber = async () => {
+    if (web3) {
+      setLoading(true);
+      try {
+        const latestBlockNumber = await web3.eth.getBlockNumber();
+        setBlockNumber(Number(latestBlockNumber));
+      } catch (error) {
+        console.error('Error fetching block number:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchBlockNumber();
+  }, [web3]);
 
   return (
     <Router>
       <div className="App">
         <header className="App-header">
           <h1>PLZCoffee Block Explorer</h1>
-          {web3 && <BlockNumber web3={web3} onBlockNumberChange={setBlockNumber} />}
+          {web3 && blockNumber !== null && <BlockNumber blockNumber={blockNumber} />}
         </header>
         <div className="App-body">
           {!web3 ? (
@@ -33,6 +52,9 @@ const App: React.FC = () => {
           ) : (
             <>
               <aside className="App-sidebar">
+                <button onClick={fetchBlockNumber} disabled={loading} className="refresh-button">
+                  {loading ? 'Loading...' : 'Refresh'}
+                </button>
                 <nav>
                   <ul>
                     <li><Link to="/transactions">Transactions</Link></li>
@@ -44,7 +66,18 @@ const App: React.FC = () => {
               </aside>
               <main className="App-content">
                 <Routes>
-                  <Route path="/transactions" element={blockNumber !== null ? <TransactionList web3={web3} blockNumber={blockNumber} /> : <p>Loading...</p>} />
+                  <Route 
+                    path="/transactions" 
+                    element={blockNumber !== null ? (
+                      <TransactionList 
+                        web3={web3} 
+                        blockNumber={blockNumber} 
+                        onBlockNumberChange={setBlockNumber} 
+                      />
+                    ) : (
+                      <p>Loading...</p>
+                    )} 
+                  />
                   <Route path="/plznft" element={<PLZNFTInfo web3={web3} />} />
                   <Route path="/plztoken" element={<PLZTokenInfo web3={web3} />} />
                   <Route path="/ordering" element={<OrderingInfo web3={web3} />} />
