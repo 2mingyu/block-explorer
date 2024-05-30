@@ -11,6 +11,7 @@ interface PLZTokenInfoProps {
 const PLZTokenInfo: React.FC<PLZTokenInfoProps> = ({ web3 }) => {
   const [userAddress, setUserAddress] = useState<string>('');
   const [balance, setBalance] = useState<string>('0');
+  const [lastRequestedAt, setLastRequestedAt] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
   const contractAddress = CONTRACT_ADDRESSES.PLZToken;
 
@@ -19,6 +20,7 @@ const PLZTokenInfo: React.FC<PLZTokenInfoProps> = ({ web3 }) => {
       if (!web3.utils.isAddress(userAddress)) {
         setError('Invalid address. Please enter a valid Ethereum address.');
         setBalance('0');
+        setLastRequestedAt(null);
         return;
       }
 
@@ -26,6 +28,10 @@ const PLZTokenInfo: React.FC<PLZTokenInfoProps> = ({ web3 }) => {
       const contract = new web3.eth.Contract(PLZTokenABI as any, contractAddress);
       const balance = await contract.methods.balanceOf(userAddress).call();
       setBalance(web3.utils.fromWei(Number(balance), 'ether'));
+
+      const lastRequestedAtTimestamp = await contract.methods.lastRequestedAt(userAddress).call();
+      const date = new Date(Number(lastRequestedAtTimestamp) * 1000);
+      setLastRequestedAt(date.toLocaleString());
     }
   };
 
@@ -42,6 +48,7 @@ const PLZTokenInfo: React.FC<PLZTokenInfoProps> = ({ web3 }) => {
         <button onClick={checkBalance}>Check Balance</button>
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <p>User Balance: {balance} PLZ</p>
+        {lastRequestedAt && <p>Last Requested At: {lastRequestedAt}</p>}
       </div>
     </div>
   );
