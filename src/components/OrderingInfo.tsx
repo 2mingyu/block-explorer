@@ -8,39 +8,65 @@ interface OrderingInfoProps {
   web3: Web3;
 }
 
+interface Order {
+  customer: string;
+  beverage: string;
+  fulfilled: boolean;
+}
+
 const OrderingInfo: React.FC<OrderingInfoProps> = ({ web3 }) => {
   const [beverages, setBeverages] = useState<string[]>([]);
-  const [orderId, setOrderId] = useState<string>('');
-  const [orderDetails, setOrderDetails] = useState<any | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [totalOrders, setTotalOrders] = useState<number | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const contractAddress = CONTRACT_ADDRESSES.Ordering;
 
   useEffect(() => {
-    const fetchBeverages = async () => {
+    const fetchBeveragesAndOrders = async () => {
+      setLoading(true);
       const contract = new web3.eth.Contract(OrderingABI as any, contractAddress);
       try {
         const beverages: unknown[] = await contract.methods.getAllValidBeverages().call();
         setBeverages(beverages as string[]);
+
+        // 총 주문 수 계산 및 주문 데이터 가져오기
+        let ordersCount = 0;
+        let allOrders: Order[] = [];
+        while (true) {
+          try {
+            const order: Order | null = await contract.methods.orders(ordersCount).call();
+            if (order) {
+              allOrders.push(order);
+              ordersCount++;
+            } else {
+              break;
+            }
+          } catch (error) {
+            break;
+          }
+        }
+        setOrders(allOrders);
+        setTotalOrders(ordersCount);
       } catch (error) {
-        console.error('Error fetching beverages:', error);
+        console.error('Error fetching data:', error);
+        setError('Failed to fetch data.');
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchBeverages();
-  }, [web3, contractAddress]); // 의존성 배열에 contractAddress 추가
+    fetchBeveragesAndOrders();
+  }, [web3, contractAddress]);
 
-  const getOrderDetails = async () => {
-    if (orderId) {
-      const contract = new web3.eth.Contract(OrderingABI as any, contractAddress);
-      try {
-        const orderDetails = await contract.methods.orders(orderId).call();
-        setOrderDetails(orderDetails);
-        setError('');
-      } catch (error) {
-        setError('Failed to fetch order details. Make sure the order ID is correct.');
-        console.error('Error fetching order details:', error);
-      }
-    }
+  const shortenAddress = (address: string | null) => {
+    if (!address) return '';
+    return `${address.slice(0, 4)}...${address.slice(-4)}`;
+  };
+
+  const copyToClipboard = (address: string) => {
+    navigator.clipboard.writeText(address);
+    alert('Address copied to clipboard!');
   };
 
   return (
@@ -55,17 +81,34 @@ const OrderingInfo: React.FC<OrderingInfoProps> = ({ web3 }) => {
         </ul>
       </div>
       <div>
-        <h3>Get Order Details</h3>
-        <input
-          type="text"
-          placeholder="Enter order ID"
-          value={orderId}
-          onChange={(e) => setOrderId(e.target.value)}
-        />
-        <button onClick={getOrderDetails}>Get Order</button>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {orderDetails && (
-          <pre>{JSON.stringify(orderDetails, null, 2)}</pre>
+        <h3>Total Orders</h3>
+        <p>{totalOrders !== null ? totalOrders : 'Loading...'}</p>
+      </div>
+      <div className="order-list">
+        <h3>All Orders</h3>
+        {loading ? (
+          <p>Loading...</p>
+        ) : error ? (
+          <p style={{ color: 'red' }}>{error}</p>
+        ) : (
+          <div className="order-list">
+            <div className="order-list-header">
+              <div>Customer</div>
+              <div>Beverage</div>
+              <div>Fulfilled</div>
+            </div>
+            {orders.map((order, index) => (
+              <div key={index} className="order-list-item">
+                <div>
+                  <span title={order.customer} onClick={() => copyToClipboard(order.customer)} className="address">
+                    {shortenAddress(order.customer)}
+                  </span>
+                </div>
+                <div>{order.beverage}</div>
+                <div>{order.fulfilled ? 'Yes' : 'No'}</div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

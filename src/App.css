@@ -1,5 +1,3 @@
-/* src/App.css */
-
 /* 전체 레이아웃 스타일 */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -196,4 +194,50 @@ details pre {
 
 .refresh-button:hover {
   background-color: #1F0318;
+}
+
+/* 주문 리스트 스타일 */
+.order-list {
+  background-color: #FFFFFF;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.order-list-header,
+.order-list-item {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 10px 0;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.order-list-header {
+  font-weight: bold;
+  background-color: #F6F4F3;
+}
+
+.order-list-item {
+  align-items: center;
+}
+
+.order-list-item:last-child {
+  border-bottom: none;
+}
+
+.order-list-item div {
+  padding: 5px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-list-item .address {
+  color: #276FBF;
+  cursor: pointer;
+}
+
+.order-list-item .address:hover {
+  color: #C58966;
 }
